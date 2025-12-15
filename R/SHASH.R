@@ -149,8 +149,7 @@ SHASH_out <- function(x,
   indx_iters_clean <- matrix(NA_integer_, nrow=n_clean, ncol=maxit)
   iter <- 0
   success <- FALSE
-
-  repeat {
+  while(iter <= max_itr & !success) {
     iter <- iter + 1
     weight_old <- weight_new
     mod <- gamlss::gamlssML(
@@ -174,11 +173,10 @@ SHASH_out <- function(x,
 
     if (isTRUE(all.equal(weight_old, weight_new))) {
       success <- TRUE
-      break
     }
-    if (iter >= maxit) break
   }
-
+  if(iter == max_iter) warning("Max iterations exceeded in SHASH distribution fitting")
+  
   norm_iters_clean <- norm_iters_clean[, seq_len(iter), drop=FALSE]
   indx_iters_clean <- indx_iters_clean[, seq_len(iter), drop=FALSE]
 
@@ -188,7 +186,7 @@ SHASH_out <- function(x,
     which(abs(x_norm_clean) > thr)
   }
 
-  n_orig <- length(x)
+  n_orig <- nrow(x)
   pad_vec <- function(v) {
     v_full <- rep(NA, n_orig)
     v_full[!na_locs] <- v
